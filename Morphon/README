@@ -1,0 +1,43 @@
+Image registration using the Morphon algorithm: an ITK implementation
+---------------------------------------------------------------------
+Jerome Plumat, Mats Andersson, Guillaume Janssens, Jonathan Orban de Xivry, Hans Knutsson and Benoit Macq
+
+for questions or remarks about the code: jerome.plumat@uclouvain.be
+
+- How to install
+----------------
+By default, the code is ready to be used with ccmake with the following command (with a Linux station):
+
+$ ccmake the_path_where_libraries_are_available
+
+where the_path_where_libraries_are_available is the path to find the given classes. If no error occurs (what usually happens if the ccmake is well configured) an executable is returned. This executable is named itkMorphon.
+
+
+- How to launch
+---------------
+When the executable was generated, you can launch the algorithm with a simple command:
+
+$ ./itkMorphon hand_indata.png hand_prot.png out.png 10 1.5 10 1.5 10 4.5 10 4.5 10 4.5 10 2 10 2 10 2 10 2 10 2 10 2 10 3.5 10 2.5
+
+It calls the Morphon algorithm with hand\_indata.tif, hand\_prot.tif and out.png parameters as respectively the fixed, moving and output images. The two first have been given in the default package. The following numbers are [number\_of\_iterations, standard\_deviation] couples. Thus, in this case, there are 13 levels with a specified number of iterations (10 on each of them in this case) and the standard deviations equal to 1.5, 1.5, 4.5, .. on each one of them. Notice that the standard deviations are given in pixel space and not in real space. The number of levels is specified by the number of [number\_of\_iterations, standard\_deviation] couples.
+This application needs, at least, the three first parameters and one couple [number\_of\_iterations, standard\_deviation] to work correctly.
+Notice that the application suppose that all the given images have the same dimensions and number of dimensions.
+
+- Brief description
+-------------------
+This document presents (very shortly) a brief introduction to the algorithm (a longer descritption is given in the article in the Insight Journal). 
+
+  The main class is itkMorphonPipe.h which contains the multi-resolution pipeline. It's this function you have to declare in a more global algorithm (like in a main function). It needs to set the following parameters BEFORE using the Update() Morphon filter's command:
+ - the moving image, set with the command: SetMovingImage( MovingImageType* MovingImage ),
+ - the fixed image: SetFixedImage( FixedImageType* MovingImage ),
+ - the number of levels: SetLevelNumber ( int nlevel ),
+ - the number of iterations on each level: SetIterationsNumber( unsigned int *noit ),
+ - the variances for each level: SetStandardDeviations ( float *nofdev ),
+ - the output image's name (with its extension): SetOutputName( std::string & OutputName ).
+  
+  All other classes which are given in the package are mainly toolbox or libraries which contain precise functions used to compute specific operations. For example:
+ - compute the deformation field (function ComputeUpdate() in itkComputingMorphonDeformationField class)
+ - make a complex multiplication over a complex number and the conjugate of an other (function ComplexMultConj() in itkComputingMorphonDeformationField class)
+ - make the convolution between the images and the quadrature filters (function Convolution() in itkComputingMorphonDeformationField class)
+ - compute the normalized averaging smoothing (ApplyUpdate() function in itkMorphonRegistrationFilter library)
+ 
